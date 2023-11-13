@@ -1,4 +1,4 @@
-module go-streamlabs
+module github.com/tlanfer/go-streamlabs
 
 go 1.20
 
