@@ -16,9 +16,10 @@ type Streamlabs interface {
 }
 
 func New() Streamlabs {
-	return &client{	}
+	return &client{}
 
 }
+
 type client struct {
 	chDonations chan<- Donation
 	client      *gosocketio.Client
@@ -41,7 +42,7 @@ func (s *client) Connect(token string) error {
 		return fmt.Errorf("failed to subscribe to create client: %w", err)
 	}
 
-	s.client = client;
+	s.client = client
 
 	err = client.On(gosocketio.OnConnection, func(c *gosocketio.Channel) {
 		Log.Printf("Streamlabs connected")
@@ -58,22 +59,17 @@ func (s *client) Connect(token string) error {
 	}
 
 	err = client.On("event", func(c *gosocketio.Channel, data ev) {
-		Log.Println(data)
 		switch data.Type {
 		case "donation":
 			amount := parseAmount(data.Message[0].Amount) * 100
 			currency := strings.ToLower(data.Message[0].Currency)
 
-			Log.Printf("Donation: %v %v", amount, currency)
 			if s.chDonations != nil {
 				s.chDonations <- Donation{
 					Amount:   amount,
 					Currency: currency,
 				}
 			}
-
-		default:
-			Log.Printf("Data: %+v", data)
 		}
 	})
 
